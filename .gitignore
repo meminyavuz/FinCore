@@ -1,0 +1,29 @@
+﻿# Visual Studio
+.vs/
+*.user
+*.suo
+
+# .NET build outputs
+**/bin/
+**/obj/
+
+# User-specific configuration and secrets
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/appsettings.*.Local.json
+**/secrets.json
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Other local projects
+/repos/
