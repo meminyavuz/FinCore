@@ -139,12 +139,18 @@ app.MapGet("/health/db", async (AppDbContext db) =>
 });
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+
+var enableSwagger =
+    app.Environment.IsDevelopment() ||
+    builder.Configuration.GetValue<bool>("EnableSwagger");
+
+if (enableSwagger)
 {
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 
 app.UseHttpsRedirection();
 
