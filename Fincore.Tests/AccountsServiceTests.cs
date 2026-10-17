@@ -14,9 +14,17 @@ public class AccountsServiceTests
 {
     private static readonly Guid TestCustomerId =
     Guid.Parse("d03a1789-ac4f-49d5-b349-057821df4548");
-    private static async Task AddTestCustomerAsync(
-    AppDbContext dbContext)
+
+    private static async Task AddTestCustomerAsync(AppDbContext dbContext)
     {
+        var customerExists = await dbContext.Customers
+            .AnyAsync(c => c.Id == TestCustomerId);
+
+        if (customerExists)
+        {
+            return;
+        }
+
         var customer = new Customer
         {
             Id = TestCustomerId,
@@ -842,6 +850,7 @@ public class AccountsServiceTests
         await using (var setupContext = new AppDbContext(options))
         {
             await setupContext.Database.EnsureCreatedAsync();
+            await AddTestCustomerAsync(setupContext);
 
             var setupService = new AccountsService(setupContext);
 
@@ -1054,8 +1063,8 @@ public class AccountsServiceTests
         Assert.Equal(300m, destinationTransferTotal);
 
         Assert.Equal(
-            sourceBalance + sourceTransferTotal,
-            1000m);
+            1000m,
+            sourceBalance + sourceTransferTotal);
 
         Assert.Equal(
             destinationBalance,
