@@ -836,7 +836,8 @@ public class AccountsServiceTests
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            return;
+            throw new InvalidOperationException(
+                "FINCORE_TEST_POSTGRES_CONNECTION ortam değişkeni tanımlanmamış.");
         }
 
         var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -851,6 +852,13 @@ public class AccountsServiceTests
         {
             await setupContext.Database.EnsureCreatedAsync();
             await AddTestCustomerAsync(setupContext);
+
+            var customerExists = await setupContext.Customers
+                .AnyAsync(c => c.Id == TestCustomerId);
+
+            Assert.True(
+                customerExists,
+                $"Test müşterisi PostgreSQL veritabanında bulunamadı. CustomerId: {TestCustomerId}");
 
             var setupService = new AccountsService(setupContext);
 
