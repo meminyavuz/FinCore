@@ -1,0 +1,47 @@
+﻿name: FinCore CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: fincore
+          POSTGRES_USER: fincore
+          POSTGRES_PASSWORD: ci_test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fincore -d fincore"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      FINCORE_TEST_POSTGRES_CONNECTION: Host=localhost;Port=5432;Database=fincore;Username=fincore;Password=ci_test_password
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore FinCore.sln
+
+      - name: Build solution
+        run: dotnet build FinCore.sln --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test FinCore.sln --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
